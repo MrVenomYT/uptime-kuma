@@ -69,7 +69,7 @@ class SetupDatabase {
         }
 
         if (process.env.UPTIME_KUMA_DB_TYPE) {
-            this.needSetup = false;
+            this.needSetup = true;
             log.info("setup-database", "UPTIME_KUMA_DB_TYPE is provided by env, try to override db-config.json");
             dbConfig.type = process.env.UPTIME_KUMA_DB_TYPE;
             dbConfig.hostname = process.env.UPTIME_KUMA_DB_HOSTNAME;
