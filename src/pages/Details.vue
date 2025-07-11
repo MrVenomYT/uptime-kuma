@@ -9,14 +9,15 @@
                     <div>{{ monitor.id }}</div>
                 </div>
             </h1>
-            <p v-if="monitor.description">{{ monitor.description }}</p>
+            <!-- eslint-disable-next-line vue/no-v-html-->
+            <p v-if="monitor.description" v-html="descriptionHTML"></p>
             <div class="d-flex">
                 <div class="tags">
                     <Tag v-for="tag in monitor.tags" :key="tag.id" :item="tag" :size="'sm'" />
                 </div>
             </div>
             <p class="url">
-                <a v-if="monitor.type === 'http' || monitor.type === 'keyword' || monitor.type === 'json-query' || monitor.type === 'mp-health' " :href="monitor.url" target="_blank" rel="noopener noreferrer">{{ filterPassword(monitor.url) }}</a>
+                <a v-if="monitor.type === 'http' || monitor.type === 'keyword' || monitor.type === 'json-query' || monitor.type === 'mp-health' || monitor.type === 'real-browser' " :href="monitor.url" target="_blank" rel="noopener noreferrer">{{ filterPassword(monitor.url) }}</a>
                 <span v-if="monitor.type === 'port'">TCP Port {{ monitor.hostname }}:{{ monitor.port }}</span>
                 <span v-if="monitor.type === 'ping'">Ping: {{ monitor.hostname }}</span>
                 <span v-if="monitor.type === 'keyword'">
@@ -79,7 +80,7 @@
                         <span class="word">{{ $t("checkEverySecond", [ monitor.interval ]) }}</span>
                     </div>
                     <div class="col-md-4 text-center">
-                        <span class="badge rounded-pill" :class=" 'bg-' + status.color " style="font-size: 30px;">{{ status.text }}</span>
+                        <span class="badge rounded-pill" :class=" 'bg-' + status.color " style="font-size: 30px;" data-testid="monitor-status">{{ status.text }}</span>
                     </div>
                 </div>
             </div>
@@ -285,6 +286,8 @@ import Tag from "../components/Tag.vue";
 import CertificateInfo from "../components/CertificateInfo.vue";
 import { getMonitorRelativeURL } from "../util.ts";
 import { URL } from "whatwg-url";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
 import { getResBaseURL } from "../util-frontend";
 import { highlight, languages } from "prismjs/components/prism-core";
 import "prismjs/components/prism-clike";
@@ -390,10 +393,7 @@ export default {
         },
 
         group() {
-            if (!this.monitor.pathName.includes("/")) {
-                return "";
-            }
-            return this.monitor.pathName.substr(0, this.monitor.pathName.lastIndexOf("/"));
+            return this.monitor.path.slice(0, -1).join(" / ");
         },
 
         pushURL() {
@@ -402,6 +402,14 @@ export default {
 
         screenshotURL() {
             return getResBaseURL() + this.monitor.screenshot + "?time=" + this.cacheTime;
+        },
+
+        descriptionHTML() {
+            if (this.monitor.description != null) {
+                return DOMPurify.sanitize(marked(this.monitor.description));
+            } else {
+                return "";
+            }
         }
     },
 
@@ -553,7 +561,7 @@ export default {
         /**
          * Return the correct title for the ping stat
          * @param {boolean} average Is the statistic an average?
-         * @returns {string} Title formatted dependant on monitor type
+         * @returns {string} Title formatted dependent on monitor type
          */
         pingTitle(average = false) {
             let translationPrefix = "";

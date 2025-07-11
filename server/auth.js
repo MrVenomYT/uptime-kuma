@@ -26,7 +26,7 @@ exports.login = async function (username, password) {
         // Upgrade the hash to bcrypt
         if (passwordHash.needRehash(user.password)) {
             await R.exec("UPDATE `user` SET password = ? WHERE id = ? ", [
-                passwordHash.generate(password),
+                await passwordHash.generate(password),
                 user.id,
             ]);
         }
@@ -130,7 +130,7 @@ function userAuthorizer(username, password, callback) {
  * @param {express.Request} req Express request object
  * @param {express.Response} res Express response object
  * @param {express.NextFunction} next Next handler in chain
- * @returns {void}
+ * @returns {Promise<void>}
  */
 exports.basicAuth = async function (req, res, next) {
     const middleware = basicAuth({
@@ -153,7 +153,7 @@ exports.basicAuth = async function (req, res, next) {
  * @param {express.Request} req Express request object
  * @param {express.Response} res Express response object
  * @param {express.NextFunction} next Next handler in chain
- * @returns {void}
+ * @returns {Promise<void>}
  */
 exports.apiAuth = async function (req, res, next) {
     if (!await Settings.get("disableAuth")) {
