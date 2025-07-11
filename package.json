@@ -4,7 +4,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/MrVenomYT/uptime-kuma"
+        "url": "https://github.com/MrVenomYT/venomous-uptime/"
     },
     "engines": {
         "node": "18 || >= 20.4.0"
